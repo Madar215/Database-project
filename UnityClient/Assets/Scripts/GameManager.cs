@@ -1,5 +1,4 @@
 using System.Collections;
-using TMPro;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -16,11 +15,6 @@ public class Question
 public class GameManager : MonoBehaviour
 {
     public int numberOfQuestion;
-    public TMP_Text questionText;
-    public TMP_Text answer1Text;
-    public TMP_Text answer2Text;
-    public TMP_Text answer3Text;
-    public TMP_Text answer4Text;
 
     private void Start()
     {
@@ -42,16 +36,5 @@ public class GameManager : MonoBehaviour
             Debug.Log(www.downloadHandler.text);
             //UpdateQuestionUI(www.downloadHandler.text);
         }
-    }
-
-    private void UpdateQuestionUI(string json)
-    {
-        var curQuestion = JsonUtility.FromJson<Question>(json);
-        questionText.text = curQuestion.questionText;
-        answer1Text.text = curQuestion.answer1Text;
-        answer2Text.text = curQuestion.answer2Text;
-        answer3Text.text = curQuestion.answer3Text;
-        answer4Text.text = curQuestion.answer4Text;
-
     }
 }
