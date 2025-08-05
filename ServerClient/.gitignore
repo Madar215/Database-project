@@ -1,0 +1,52 @@
+## Build Results
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+## VS/JetBrains IDE files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+.idea/
+*.DotSettings
+
+## VS Code
+.vscode/
+.vscode/settings.json
+.vscode/tasks.json
+.vscode/launch.json
+.vscode/extensions.json
+
+## OS Junk
+.DS_Store
+Thumbs.db
+
+## NuGet
+*.nupkg
+*.snupkg
+.nuget/
+packages/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+## Debug & crash logs
+*.log
+*.bak
+*.old
+*.orig
+
+## Others
+_ReSharper*/
+[Tt]est[Rr]esult*/
+build/
+*.dbmdl
+*.cache
+*.coverage
+*.coveragexml
+
+## Rider specific
+*.sln.iml
