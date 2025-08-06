@@ -25,7 +25,7 @@ namespace TriviaServer.Controllers
             return question;
         }
 
-        [HttpGet("active count")]
+        [HttpGet("active-count")]
         public async Task<int> GetActivePlayers()
         {
             int activePlayers = await DatabaseManager.Instance.GetActivePlayers();
@@ -40,7 +40,7 @@ namespace TriviaServer.Controllers
             return result;
         }
 
-        [HttpPost("update player")]
+        [HttpPost("update-player")]
         public async Task<bool> Post(int id, int score, float time)
         {
             bool result = await DatabaseManager.Instance.UpdatePlayer(id, score, time);

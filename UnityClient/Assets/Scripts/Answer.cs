@@ -25,6 +25,10 @@ public class Answer : MonoBehaviour {
     }
 
     public void OnClick() {
-        background.color = answerQuestion == uiManager.CurQuestionCorrectAnswer ? Color.green : Color.red;
+        var isCorrect = answerQuestion == uiManager.CurQuestionCorrectAnswer;
+        background.color = isCorrect ? Color.green : Color.red;
+        
+        // Deactivate answers buttons
+        uiManager.ToggleAnswersButtons();
     }
 }

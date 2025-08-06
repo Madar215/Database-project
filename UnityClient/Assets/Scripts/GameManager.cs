@@ -76,6 +76,10 @@ public class GameManager : MonoBehaviour {
         Debug.Log("GAME OVER");
     }
 
+    public void OnAnswer(bool isCorrect) {
+        // TODO: Cache Player's Answer and Time Accumulated
+    }
+
     private IEnumerator GetQuestions() {
         var www = UnityWebRequest.Get("http://localhost:5195/api/Trivia");
         yield return www.SendWebRequest();

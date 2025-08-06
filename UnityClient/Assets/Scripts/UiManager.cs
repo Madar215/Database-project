@@ -5,6 +5,9 @@ using UnityEngine.UI;
 public class UiManager : MonoBehaviour {
     [Header("References")] 
     [SerializeField] private GameManager gameManager;
+
+    [Header("Buttons")] 
+    [SerializeField] private Button[] answersButtons;
     
     [Header("Questions")] 
     [SerializeField] private TextMeshProUGUI questionText;
@@ -18,8 +21,10 @@ public class UiManager : MonoBehaviour {
     [SerializeField] private TextMeshProUGUI timerCounter;
     
     // Current Question
-    private Question _curQuestion;
     public int CurQuestionCorrectAnswer { get; private set; }
+    
+    // Buttons
+    private bool _buttonsActive;
 
     private void OnEnable() {
         gameManager.OnRoundStart += OnRoundStart;
@@ -35,12 +40,14 @@ public class UiManager : MonoBehaviour {
     }
 
     private void OnRoundStart(Question question) {
-        // Cache the current question
-        _curQuestion = question;
+        // Cache the current question answer
         CurQuestionCorrectAnswer = question.correctAnswer;
         
         // Update UI
         UpdateQuestionUI(question);
+        
+        // Activate answers buttons
+        ToggleAnswersButtons();
     }
 
     private void UpdateQuestionUI(Question question) {
@@ -49,5 +56,15 @@ public class UiManager : MonoBehaviour {
         answer2Text.text = question.answer2Text;
         answer3Text.text = question.answer3Text;
         answer4Text.text = question.answer4Text;
+    }
+
+    public void ToggleAnswersButtons() {
+        // Toggle active state
+        _buttonsActive = !_buttonsActive;
+        
+        // Active/Disable each button
+        foreach (var button in answersButtons) {
+            button.interactable = _buttonsActive;
+        }
     }
 }
