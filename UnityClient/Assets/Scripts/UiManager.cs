@@ -15,6 +15,11 @@ public class UiManager : MonoBehaviour {
     [SerializeField] private TextMeshProUGUI answer2Text;
     [SerializeField] private TextMeshProUGUI answer3Text;
     [SerializeField] private TextMeshProUGUI answer4Text;
+    
+    [Header("Menu")] 
+    [SerializeField] private TMP_InputField nameInput;
+    [SerializeField] private Button joinButton;
+    [SerializeField] private TextMeshProUGUI statusText;
 
     [Header("Timer")] 
     [SerializeField] private Slider timerSlider;
@@ -32,6 +37,10 @@ public class UiManager : MonoBehaviour {
 
     private void OnDisable() {
         gameManager.OnRoundStart-= OnRoundStart;
+    }
+
+    private void Start() {
+        joinButton.onClick.AddListener(OnJoinClicked);
     }
 
     private void Update() {
@@ -66,5 +75,16 @@ public class UiManager : MonoBehaviour {
         foreach (var button in answersButtons) {
             button.interactable = _buttonsActive;
         }
+    }
+
+    private void OnJoinClicked() {
+        var playerName = nameInput.text.Trim();
+
+        if (string.IsNullOrEmpty(playerName)) {
+            statusText.text = "Please enter a name!";
+            return;
+        }
+        
+        gameManager.AddNewPlayer(playerName);
     }
 }

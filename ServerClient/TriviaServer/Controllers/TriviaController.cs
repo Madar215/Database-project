@@ -34,9 +34,9 @@ namespace TriviaServer.Controllers
 
         // POST api/<TriviaController>
         [HttpPost]
-        public async Task<int> Post([FromBody] string name, bool isActive)
+        public async Task<int> Post([FromBody] PlayerDto player)
         {
-            int result =  await DatabaseManager.Instance.AddPlayer(name, isActive);
+            int result = await DatabaseManager.Instance.AddPlayer(player.name, player.isActive);
             return result;
         }
 
