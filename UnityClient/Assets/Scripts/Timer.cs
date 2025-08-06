@@ -2,7 +2,7 @@ using System;
 
 public abstract class Timer {
     protected float InitialTime;
-    protected float Time { get; set; }
+    public float Time { get; set; }
     public bool IsRunning { get; protected set; }
         
     public float Progress => Time / InitialTime;

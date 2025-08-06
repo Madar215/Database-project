@@ -27,23 +27,23 @@ public class GameManager : MonoBehaviour {
     public event UnityAction<Question> OnRoundStart;
     
     // Timer
-    private CountdownTimer _roundTimer;
+    public CountdownTimer RoundTimer { get; set; }
     
     // Questions
     private int _curQuestionIndex;
 
     private void Awake() {
-        _roundTimer = new CountdownTimer(timerDuration);
+        RoundTimer = new CountdownTimer(timerDuration);
     }
 
     private void OnEnable() {
-        _roundTimer.OnTimerStart += StartRound;
-        _roundTimer.OnTimerStop += EndRound;
+        RoundTimer.OnTimerStart += StartRound;
+        RoundTimer.OnTimerStop += EndRound;
     }
 
     private void OnDisable() {
-        _roundTimer.OnTimerStart -= StartRound;
-        _roundTimer.OnTimerStop -= EndRound;
+        RoundTimer.OnTimerStart -= StartRound;
+        RoundTimer.OnTimerStop -= EndRound;
     }
 
     private void Start() {
@@ -51,7 +51,7 @@ public class GameManager : MonoBehaviour {
     }
 
     private void Update() {
-        _roundTimer.Tick(Time.deltaTime);
+        RoundTimer.Tick(Time.deltaTime);
     }
 
     private void StartRound() {
@@ -80,7 +80,7 @@ public class GameManager : MonoBehaviour {
 
             // Store it for later
             Questions = JsonHelper.FromJson<Question>(json);
-            _roundTimer.Start();
+            RoundTimer.Start();
         }
     }
 }

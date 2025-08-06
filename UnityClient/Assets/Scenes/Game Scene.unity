@@ -3692,6 +3692,8 @@ MonoBehaviour:
   answer2Text: {fileID: 433960270}
   answer3Text: {fileID: 353348724}
   answer4Text: {fileID: 366894076}
+  timerSlider: {fileID: 888616064}
+  timerCounter: {fileID: 915063408}
 --- !u!4 &1960971348
 Transform:
   m_ObjectHideFlags: 0
