@@ -1,4 +1,3 @@
-using System.Globalization;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -17,18 +16,31 @@ public class UiManager : MonoBehaviour {
     [Header("Timer")] 
     [SerializeField] private Slider timerSlider;
     [SerializeField] private TextMeshProUGUI timerCounter;
+    
+    // Current Question
+    private Question _curQuestion;
+    public int CurQuestionCorrectAnswer { get; private set; }
 
     private void OnEnable() {
-        gameManager.OnRoundStart += UpdateQuestionUI;
+        gameManager.OnRoundStart += OnRoundStart;
     }
 
     private void OnDisable() {
-        gameManager.OnRoundStart-= UpdateQuestionUI;
+        gameManager.OnRoundStart-= OnRoundStart;
     }
 
     private void Update() {
         timerSlider.value = gameManager.RoundTimer.Progress;
         timerCounter.text = Mathf.CeilToInt(gameManager.RoundTimer.Time).ToString();
+    }
+
+    private void OnRoundStart(Question question) {
+        // Cache the current question
+        _curQuestion = question;
+        CurQuestionCorrectAnswer = question.correctAnswer;
+        
+        // Update UI
+        UpdateQuestionUI(question);
     }
 
     private void UpdateQuestionUI(Question question) {

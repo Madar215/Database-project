@@ -20,17 +20,17 @@ public class GameManager : MonoBehaviour {
     [Header("Timer")] 
     [SerializeField] private float timerDuration = 10f;
     
-    // Properties
-    public Question[] Questions { get; set; }
-    
     // Events
     public event UnityAction<Question> OnRoundStart;
+    public event UnityAction OnRoundEnd;
     
     // Timer
-    public CountdownTimer RoundTimer { get; set; }
+    public CountdownTimer RoundTimer { get; private set; }
     
     // Questions
+    private Question[] _questions;
     private int _curQuestionIndex;
+    private int _totalQuestions;
 
     private void Awake() {
         RoundTimer = new CountdownTimer(timerDuration);
@@ -55,18 +55,25 @@ public class GameManager : MonoBehaviour {
     }
 
     private void StartRound() {
-        if (Questions.Length > 0 && _curQuestionIndex < Questions.Length)
-            OnRoundStart?.Invoke(Questions[_curQuestionIndex]);
-        else
-            GameOver();
+        // If there are questions from the database AND we are no at the last question -> get the next one
+        if (_questions.Length > 0 && _curQuestionIndex < _questions.Length)
+            OnRoundStart?.Invoke(_questions[_curQuestionIndex]);
     }
 
     private void EndRound() {
         // TODO: Implement Round End
+        if (_curQuestionIndex + 1 == _totalQuestions)
+            GameOver();
+        else {
+            OnRoundEnd?.Invoke();
+            ++_curQuestionIndex;
+            RoundTimer.Start();
+        }
     }
 
     private void GameOver() {
         // TODO: Implement Game Over
+        Debug.Log("GAME OVER");
     }
 
     private IEnumerator GetQuestions() {
@@ -79,7 +86,10 @@ public class GameManager : MonoBehaviour {
             var json = www.downloadHandler.text;
 
             // Store it for later
-            Questions = JsonHelper.FromJson<Question>(json);
+            _questions = JsonHelper.FromJson<Question>(json);
+            _totalQuestions = _questions.Length;
+            
+            // Start the round timer
             RoundTimer.Start();
         }
     }
