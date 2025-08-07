@@ -1,7 +1,6 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.Networking;
 
 public class GameManager : MonoBehaviour {
     [Header("References")] 
@@ -9,6 +8,9 @@ public class GameManager : MonoBehaviour {
 
     [Header("Timer")] 
     [SerializeField] private float timerDuration = 10f;
+
+    [Header("Join Parameters")] 
+    [SerializeField] private float activePlayersPoll = 2f;
     
     // Events
     public event UnityAction<Question> OnRoundStart;
@@ -24,7 +26,15 @@ public class GameManager : MonoBehaviour {
     private Question[] _questions;
     private int _curQuestionIndex;
     private int _totalQuestions;
+    
+    // Server Client
+    private readonly ServerClient _serverClient = new();
+    
+    // Game
+    private bool _gameStarted;
 
+    #region MonoBehaviour
+    
     private void Awake() {
         RoundTimer = new CountdownTimer(timerDuration);
     }
@@ -41,12 +51,21 @@ public class GameManager : MonoBehaviour {
 
     private void Start() {
         StartCoroutine(GetQuestions());
+        StartCoroutine(WaitForPlayers());
     }
 
     private void Update() {
         RoundTimer.Tick(Time.deltaTime);
     }
+    
+    #endregion
 
+    #region Game
+
+    private void StartGame() {
+        RoundTimer.Start();
+    }
+    
     private void StartRound() {
         // If there are questions from the database AND we are no at the last question -> get the next one
         if (_questions.Length > 0 && _curQuestionIndex < _questions.Length)
@@ -66,79 +85,61 @@ public class GameManager : MonoBehaviour {
 
     private void GameOver() {
         // TODO: Implement Game Over
-        Debug.Log("GAME OVER");
     }
 
     public void OnAnswer(bool isCorrect) {
         // TODO: Cache Player's Answer and Time Accumulated
     }
     
+    #endregion
+
+    #region Server
+    
     private IEnumerator PostPlayerData(int id, int score, float time) {
-        string url = "http://localhost:5195/update-player";
-
-        WWWForm form = new WWWForm();
-        form.AddField("id", id);
-        form.AddField("score", score);
-        form.AddField("time", time.ToString("F2"));
-
-        UnityWebRequest www = UnityWebRequest.Post(url, form);
-        yield return www.SendWebRequest();
-
-        if (www.result != UnityWebRequest.Result.Success) {
-            Debug.LogError("Error updating player: " + www.error);
-        } else {
-            Debug.Log("Player updated: " + www.downloadHandler.text);
-        }
+        yield return _serverClient.UpdatePlayer(id, score, time,
+            () => Debug.Log("Player updated."),
+            error => Debug.LogError("Update failed: " + error)
+        );
     }
     
     private IEnumerator GetQuestions() {
-        var www = UnityWebRequest.Get("http://localhost:5195/api/Trivia");
-        yield return www.SendWebRequest();
-
-        if (www.result == UnityWebRequest.Result.ConnectionError || www.result == UnityWebRequest.Result.ProtocolError) {
-            Debug.Log(www.error);
-        } else {
-            var json = www.downloadHandler.text;
-
-            // Store it for later
-            _questions = JsonHelper.FromJson<Question>(json);
-            _totalQuestions = _questions.Length;
-            
-            // Start the round timer
-            RoundTimer.Start();
-        }
+        yield return _serverClient.GetQuestions(
+            questions => {
+                _questions = questions;
+                _totalQuestions = questions.Length;
+            },
+            error => Debug.LogError("Get questions failed: " + error)
+        );
     }
+
 
     public void AddNewPlayer(string playerName, bool isActive = true) {
-        PlayerData data = new PlayerData(playerName, isActive);
-        string json = JsonUtility.ToJson(data);
-
-        StartCoroutine(SendPlayerData(json));
+        StartCoroutine(_serverClient.AddNewPlayer(playerName, isActive, 
+            id => {
+                playerId = id;
+                Debug.Log("Player joined, ID: " + playerId);
+                // Optionally start waiting for players here
+            },
+            error => Debug.LogError("Add player failed: " + error)
+        ));
     }
 
-    private IEnumerator SendPlayerData(string json) {
-        string url = "http://localhost:5195/api/Trivia";
+    private IEnumerator WaitForPlayers() {
+        while (!_gameStarted) {
+            yield return _serverClient.GetActivePlayers(
+                count => {
+                    Debug.Log("Active players: " + count);
+                    if (count >= 2) {
+                        _gameStarted = true;
+                        StartGame();
+                    }
+                },
+                error => Debug.LogError("Active count failed: " + error)
+            );
 
-        UnityWebRequest request = new UnityWebRequest(url, "POST");
-        byte[] jsonToSend = new System.Text.UTF8Encoding().GetBytes(json);
-        request.uploadHandler = new UploadHandlerRaw(jsonToSend);
-        request.downloadHandler = new DownloadHandlerBuffer();
-        request.SetRequestHeader("Content-Type", "application/json");
-
-        yield return request.SendWebRequest();
-
-        if (request.result != UnityWebRequest.Result.Success) {
-            Debug.Log("Add player failed: " + request.error);
-        } else {
-            // Parse the returned player ID
-            string responseText = request.downloadHandler.text;
-            
-            if (int.TryParse(responseText, out int id)) {
-                playerId = id;
-                Debug.Log($"Player added! ID = {playerId}");
-            } else {
-                Debug.Log("Failed to parse player ID: " + responseText);
-            }
+            yield return new WaitForSeconds(activePlayersPoll);
         }
     }
+    
+    #endregion
 }
