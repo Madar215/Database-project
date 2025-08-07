@@ -42,7 +42,7 @@ namespace TriviaServer.Controllers
         }
 
         [HttpPost("update-player")]
-        public async Task<bool> Post(int id, int score, float time)
+        public async Task<bool> Post([FromForm]int id, [FromForm]int score, [FromForm]float time)
         {
             bool result = await DatabaseManager.Instance.UpdatePlayer(id, score, time);
             return result;
