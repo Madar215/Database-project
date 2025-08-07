@@ -11,8 +11,12 @@ public class GameManager : MonoBehaviour {
 
     [Header("Join Parameters")] 
     [SerializeField] private float activePlayersPoll = 2f;
+
+    [Header("Game Parameters")] 
+    [SerializeField] private int correctAnswerScoreReward = 10;
     
     // Events
+    public event UnityAction OnGameStart; 
     public event UnityAction<Question> OnRoundStart;
     public event UnityAction OnRoundEnd;
     
@@ -20,7 +24,9 @@ public class GameManager : MonoBehaviour {
     public CountdownTimer RoundTimer { get; private set; }
     
     // Player
-    public int playerId = -1;
+    private int _playerId = -1;
+    private int _score;
+    private float _timeAccumulated;
     
     // Questions
     private Question[] _questions;
@@ -64,6 +70,7 @@ public class GameManager : MonoBehaviour {
 
     private void StartGame() {
         RoundTimer.Start();
+        OnGameStart?.Invoke();
     }
     
     private void StartRound() {
@@ -73,7 +80,6 @@ public class GameManager : MonoBehaviour {
     }
 
     private void EndRound() {
-        // TODO: Implement Round End
         if (_curQuestionIndex + 1 == _totalQuestions)
             GameOver();
         else {
@@ -88,7 +94,15 @@ public class GameManager : MonoBehaviour {
     }
 
     public void OnAnswer(bool isCorrect) {
-        // TODO: Cache Player's Answer and Time Accumulated
+        if (isCorrect) {
+            _score += correctAnswerScoreReward;
+            _timeAccumulated += timerDuration - RoundTimer.Time;
+        }
+        else {
+            _timeAccumulated += timerDuration;
+        }
+
+        StartCoroutine(PostPlayerData(_playerId, _score, _timeAccumulated));
     }
     
     #endregion
@@ -116,8 +130,8 @@ public class GameManager : MonoBehaviour {
     public void AddNewPlayer(string playerName, bool isActive = true) {
         StartCoroutine(_serverClient.AddNewPlayer(playerName, isActive, 
             id => {
-                playerId = id;
-                Debug.Log("Player joined, ID: " + playerId);
+                _playerId = id;
+                Debug.Log("Player joined, ID: " + _playerId);
                 // Optionally start waiting for players here
             },
             error => Debug.LogError("Add player failed: " + error)

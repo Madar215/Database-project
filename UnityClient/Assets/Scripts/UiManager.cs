@@ -6,6 +6,10 @@ public class UiManager : MonoBehaviour {
     [Header("References")] 
     [SerializeField] private GameManager gameManager;
 
+    [Header("Panels")] 
+    [SerializeField] private GameObject menuPanel;
+    [SerializeField] private GameObject gamePanel;
+
     [Header("Buttons")] 
     [SerializeField] private Button[] answersButtons;
     
@@ -33,10 +37,12 @@ public class UiManager : MonoBehaviour {
 
     private void OnEnable() {
         gameManager.OnRoundStart += OnRoundStart;
+        gameManager.OnGameStart += OnGameStart;
     }
 
     private void OnDisable() {
-        gameManager.OnRoundStart-= OnRoundStart;
+        gameManager.OnRoundStart -= OnRoundStart;
+        gameManager.OnGameStart -= OnGameStart;
     }
 
     private void Start() {
@@ -46,6 +52,11 @@ public class UiManager : MonoBehaviour {
     private void Update() {
         timerSlider.value = gameManager.RoundTimer.Progress;
         timerCounter.text = Mathf.CeilToInt(gameManager.RoundTimer.Time).ToString();
+    }
+
+    private void OnGameStart() {
+        menuPanel.SetActive(false);
+        gamePanel.SetActive(true);
     }
 
     private void OnRoundStart(Question question) {

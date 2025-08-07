@@ -1904,7 +1904,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   uiManager: {fileID: 1960971347}
   timerDuration: 10
-  playerId: -1
+  activePlayersPoll: 2
+  correctAnswerScoreReward: 10
 --- !u!4 &684359156
 Transform:
   m_ObjectHideFlags: 0
@@ -4859,6 +4860,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gameManager: {fileID: 684359155}
+  menuPanel: {fileID: 143867205}
+  gamePanel: {fileID: 1247139862}
   answersButtons:
   - {fileID: 1985790417}
   - {fileID: 780452374}

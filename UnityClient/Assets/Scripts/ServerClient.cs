@@ -58,7 +58,7 @@ public class ServerClient {
     }
 
     public IEnumerator GetActivePlayers(Action<int> onSuccess, Action<string> onError) {
-        UnityWebRequest request = UnityWebRequest.Get($"{BaseUrl}/active-count");
+        UnityWebRequest request = UnityWebRequest.Get($"{BaseUrl}/api/Trivia/active-count");
         yield return request.SendWebRequest();
 
         if (request.result != UnityWebRequest.Result.Success) {

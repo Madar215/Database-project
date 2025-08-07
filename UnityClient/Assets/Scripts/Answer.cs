@@ -30,5 +30,8 @@ public class Answer : MonoBehaviour {
         
         // Deactivate answers buttons
         uiManager.ToggleAnswersButtons();
+        
+        // Inform the game manager
+        gameManager.OnAnswer(isCorrect);
     }
 }
