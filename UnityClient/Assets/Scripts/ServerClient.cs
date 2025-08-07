@@ -47,7 +47,7 @@ public class ServerClient {
         form.AddField("score", score);
         form.AddField("time", time.ToString("F2"));
 
-        UnityWebRequest request = UnityWebRequest.Post($"{BaseUrl}/update-player", form);
+        UnityWebRequest request = UnityWebRequest.Post($"{BaseUrl}/api/Trivia/update-player", form);
         yield return request.SendWebRequest();
 
         if (request.result != UnityWebRequest.Result.Success) {
@@ -69,4 +69,28 @@ public class ServerClient {
             onError?.Invoke("Invalid count format");
         }
     }
+    
+    public IEnumerator GetTopPlayerId(Action<int> onSuccess, Action<string> onError)
+    {
+        UnityWebRequest request = UnityWebRequest.Get($"{BaseUrl}/api/Trivia/top-player");
+        yield return request.SendWebRequest();
+
+        if (request.result != UnityWebRequest.Result.Success)
+        {
+            onError?.Invoke(request.error);
+        }
+        else
+        {
+            string json = request.downloadHandler.text;
+            if (int.TryParse(json, out int winnerId))
+            {
+                onSuccess?.Invoke(winnerId);
+            }
+            else
+            {
+                onError?.Invoke("Failed to parse winner ID: " + json);
+            }
+        }
+    }
+
 }

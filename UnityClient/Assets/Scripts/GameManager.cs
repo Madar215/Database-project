@@ -16,7 +16,8 @@ public class GameManager : MonoBehaviour {
     [SerializeField] private int correctAnswerScoreReward = 10;
     
     // Events
-    public event UnityAction OnGameStart; 
+    public event UnityAction OnGameStart;
+    public event UnityAction<string, int, float> OnGameOver;
     public event UnityAction<Question> OnRoundStart;
     public event UnityAction OnRoundEnd;
     
@@ -80,7 +81,9 @@ public class GameManager : MonoBehaviour {
     }
 
     private void EndRound() {
-        if (_curQuestionIndex + 1 == _totalQuestions)
+        var isLastQuestion = _curQuestionIndex + 1 == _totalQuestions;
+        
+        if (isLastQuestion)
             GameOver();
         else {
             OnRoundEnd?.Invoke();
@@ -89,9 +92,24 @@ public class GameManager : MonoBehaviour {
         }
     }
 
-    private void GameOver() {
-        // TODO: Implement Game Over
+    private void GameOver()
+    {
+        StartCoroutine(_serverClient.GetTopPlayerId(
+            winnerId =>
+            {
+                if (_playerId == winnerId)
+                {
+                    OnGameOver?.Invoke("You Won", _score, _timeAccumulated);
+                }
+                else
+                {
+                    OnGameOver?.Invoke("You Lose", _score, _timeAccumulated);
+                }
+            },
+            error => Debug.LogError("Failed to get winner ID: " + error)
+        ));
     }
+
 
     public void OnAnswer(bool isCorrect) {
         if (isCorrect) {

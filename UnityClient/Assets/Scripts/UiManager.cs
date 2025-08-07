@@ -1,3 +1,4 @@
+using System.Globalization;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,6 +10,7 @@ public class UiManager : MonoBehaviour {
     [Header("Panels")] 
     [SerializeField] private GameObject menuPanel;
     [SerializeField] private GameObject gamePanel;
+    [SerializeField] private GameObject gameOverPanel;
 
     [Header("Buttons")] 
     [SerializeField] private Button[] answersButtons;
@@ -25,6 +27,11 @@ public class UiManager : MonoBehaviour {
     [SerializeField] private Button joinButton;
     [SerializeField] private TextMeshProUGUI statusText;
 
+    [Header("Game Over")] 
+    [SerializeField] private TextMeshProUGUI outcomeText;
+    [SerializeField] private TextMeshProUGUI scoreText;
+    [SerializeField] private TextMeshProUGUI timeText;
+
     [Header("Timer")] 
     [SerializeField] private Slider timerSlider;
     [SerializeField] private TextMeshProUGUI timerCounter;
@@ -38,11 +45,13 @@ public class UiManager : MonoBehaviour {
     private void OnEnable() {
         gameManager.OnRoundStart += OnRoundStart;
         gameManager.OnGameStart += OnGameStart;
+        gameManager.OnGameOver += OnGameOver;
     }
 
     private void OnDisable() {
         gameManager.OnRoundStart -= OnRoundStart;
         gameManager.OnGameStart -= OnGameStart;
+        gameManager.OnGameOver -= OnGameOver;
     }
 
     private void Start() {
@@ -97,5 +106,14 @@ public class UiManager : MonoBehaviour {
         }
         
         gameManager.AddNewPlayer(playerName);
+    }
+
+    private void OnGameOver(string msg, int score, float time) {
+        gamePanel.SetActive(false);
+        gameOverPanel.SetActive(true);
+
+        outcomeText.text = msg;
+        scoreText.text = score.ToString();
+        timeText.text = time.ToString(CultureInfo.InvariantCulture);
     }
 }

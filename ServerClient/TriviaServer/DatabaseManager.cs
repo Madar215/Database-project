@@ -1,4 +1,5 @@
 ﻿using Npgsql;
+using System.Numerics;
 
 namespace TriviaServer
 {
@@ -162,5 +163,27 @@ namespace TriviaServer
                 return false;
             }
         }
+
+        public async Task<int?> GetTopPlayerId()
+        {
+            try
+            {
+                await using var connection = new NpgsqlConnection(_connectionString);
+                await connection.OpenAsync();
+
+                const string query = "SELECT id FROM players ORDER BY score DESC, timeaccumulated ASC LIMIT 1;";
+                await using var cmd = new NpgsqlCommand(query, connection);
+
+                var result = await cmd.ExecuteScalarAsync();
+                return result != null ? Convert.ToInt32(result) : null;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("DB Error: " + ex.Message);
+                return null;
+            }
+        }
+
+
     }
 }

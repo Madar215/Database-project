@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Collections;
+using System.Numerics;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -46,6 +47,13 @@ namespace TriviaServer.Controllers
             bool result = await DatabaseManager.Instance.UpdatePlayer(id, score, time);
             return result;
         }
+
+        [HttpGet("top-player")]
+        public async Task<int?> GetTopPlayer()
+        {
+            return await DatabaseManager.Instance.GetTopPlayerId();
+        }
+
 
         // PUT api/<TriviaController>/5
         [HttpPut("{id}")]
