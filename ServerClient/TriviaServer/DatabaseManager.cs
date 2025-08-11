@@ -9,10 +9,7 @@ namespace TriviaServer
         private static readonly object padlock = new object();
 
         private string _connectionString = "Host=aws-0-eu-north-1.pooler.supabase.com;Database=postgres;Username=postgres.iydtculxsldvaswpgeev;Password=Gmadar25!010;Port=5432;SSL Mode=Require;Trust Server Certificate=true";
-
-        DatabaseManager()
-        {
-        }
+        public IConfigurationRoot Configuration { get; private set; }
 
         public static DatabaseManager Instance
         {
@@ -27,6 +24,16 @@ namespace TriviaServer
                     return instance;
                 }
             }
+        }
+
+        private DatabaseManager()
+        {
+            // Load config from appsettings.json
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+
+            Configuration = builder.Build();
         }
 
 

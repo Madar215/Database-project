@@ -7,6 +7,14 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+var mongoConn = builder.Configuration.GetValue<string>("Mongo:ConnectionString");
+
+if (string.IsNullOrWhiteSpace(mongoConn))
+    throw new Exception("Mongo:ConnectionString is missing from configuration");
+
+// register as singleton
+builder.Services.AddSingleton(new MongoScoreboard(mongoConn));
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

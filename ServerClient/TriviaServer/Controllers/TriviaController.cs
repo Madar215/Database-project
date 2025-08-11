@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System.Collections;
 using System.Numerics;
 
@@ -10,6 +11,13 @@ namespace TriviaServer.Controllers
     [ApiController]
     public class TriviaController : ControllerBase
     {
+        private readonly MongoScoreboard _mongo;
+
+        public TriviaController(MongoScoreboard mongo)
+        {
+            _mongo = mongo;
+        }
+
         // GET: api/<TriviaController>
         [HttpGet]
         public async Task<IEnumerable<Question>> Get()
@@ -42,10 +50,36 @@ namespace TriviaServer.Controllers
         }
 
         [HttpPost("update-player")]
-        public async Task<bool> Post([FromForm]int id, [FromForm]int score, [FromForm]float time)
+        public async Task<IActionResult> UpdatePlayer(
+        [FromForm] int id,
+        [FromForm] int score,
+        [FromForm] float time,
+        [FromServices] MongoScoreboard mongo,
+        ILogger<TriviaController> logger)
         {
-            bool result = await DatabaseManager.Instance.UpdatePlayer(id, score, time);
-            return result;
+            try
+            {
+                var ok = await DatabaseManager.Instance.UpdatePlayer(id, score, time);
+                if (!ok) return BadRequest(false);
+
+                try
+                {
+                    mongo.InsertScore(id, score, time); // mirror to NoSQL
+                }
+                catch (Exception mex)
+                {
+                    logger.LogError(mex, "Mongo insert failed for id {Id}", id);
+                    // choose: either still Ok, or fail hard:
+                    // return StatusCode(500, "Mongo insert failed");
+                }
+
+                return Ok(true);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "UpdatePlayer failed for id {Id}", id);
+                return StatusCode(500, "SQL update failed");
+            }
         }
 
         [HttpGet("top-player")]
